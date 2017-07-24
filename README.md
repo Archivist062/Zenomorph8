@@ -6,7 +6,7 @@ An homomorphic encryption single file encrypter in plain ECMAScript (Javascript)
 Include the file in anyway you want. Then use :
 
 ```javascript
-key = [153,123,12,52]; // Any number under 255 is fine, higher number put you at risk of loss of precision. Any length is fine.
+key = [153,123,12,52]; // Any number under 255 is fine but floating point are kinda OK, higher number or very precise floating point value put you at risk of loss of precision. Any length is fine.
 salt = [31,25,65,14]; // Same as for the key, but the length needs to match the one of the key. This requirement may be suppressed.
 
 line = "This will be encrypted even in 日本語(japanese) ";
