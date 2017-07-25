@@ -140,9 +140,75 @@ int main(int argc,const char** argv)
 		if(salt_sz!=key_sz){printf("Salt and key have different sizes\n");exit(6);}
 		zeno_cipher* cipher=crypt16(data,data_sz,key,salt,key_sz);
 		printAsJSONarray(cipher->content,cipher->size);
-	}else if(strcmp("decrypt",argv[1])==0)
+	}else if(strcmp("decrypt",argv[1])==0||strcmp("decrypt_s",argv[1])==0)
 	{
-		printf("decrypt");
+		float* key;
+		size_t key_sz;
+		if(argv[2][0]=='[')
+		{
+			zeno_cipher* tmp_key=fromJSONarray(argv[2]);
+			key=(float*)malloc(sizeof(float)*tmp_key->size);
+			for(size_t idx=0;idx<tmp_key->size;idx++)key[idx]=tmp_key->content[idx];
+			key_sz=tmp_key->size;
+			free(tmp_key);
+		}
+		else
+		{
+			key=(float*)malloc(1);
+			size_t cur=0;
+			char n=argv[2][cur];
+			do{
+				cur++;
+				key=realloc(key,cur*sizeof(double));
+				key[cur-1]=(unsigned int)n;
+				n=argv[2][cur];
+			}while(n!='\0');
+			key_sz=cur;
+		}
+		float* salt;
+		size_t salt_sz;
+		if(argv[3][0]=='[')
+		{
+			zeno_cipher* tmp_salt=fromJSONarray(argv[3]);
+			salt=(float*)malloc(sizeof(float)*tmp_salt->size);
+			for(size_t idx=0;idx<tmp_salt->size;idx++)salt[idx]=tmp_salt->content[idx];
+			salt_sz=tmp_salt->size;
+			free(tmp_salt);
+		}
+		else
+		{
+			salt=(float*)malloc(1);
+			size_t cur=0;
+			char n=argv[3][cur];
+			do{
+				cur++;
+				salt=realloc(salt,cur*sizeof(double));
+				salt[cur-1]=(unsigned int)n;
+				n=argv[3][cur];
+			}while(n!='\0');
+			salt_sz=cur;
+		}
+		zeno_cipher* data;
+		if(argv[4][0]=='[')
+		{
+			data=fromJSONarray(argv[4]);
+		}
+		else
+		{
+			printf("Non data content on decrypt.");exit(8);
+		}
+		if(salt_sz!=key_sz){printf("Salt and key have different sizes\n");exit(6);}
+		double* farray=decrypt16(data,key,salt,key_sz);
+		if(strcmp("decrypt_s",argv[1])==0)
+		{
+			for(size_t idx=0;idx<data->size;idx++)
+				printf("%c",(char)(data->content[idx]));
+			printf("\n");
+		}
+		else
+		{
+			printAsJSONarray(farray,data->size);
+		}
 	}else {
 		printf("Bad option, use without options to display help\n");
 		return 2;
@@ -183,7 +249,7 @@ crypt16(
 	return ret;
 }
 
-int16_t* 
+double* 
 #ifdef __cplusplus
 archivist::
 #endif
@@ -194,7 +260,14 @@ decrypt16(
 	size_t key_sz
 )
 {
+	size_t nb_d=key_sz;
 
+	for(size_t i=0;i<data->size;i++)
+	{
+		data->content[i]=//(vec[i]/10000.0*(1+key[i%nb_d]))+salt[i%nb_d];
+		round((data->content[i]-salt[i%nb_d])/(1+key[i%nb_d])*10000);
+	}
+	return data->content;
 }
 
 zeno_cipher* 

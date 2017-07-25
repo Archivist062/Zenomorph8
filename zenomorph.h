@@ -23,7 +23,7 @@ zeno_cipher* crypt16(
 	size_t key_sz
 );
 
-int16_t* decrypt16(
+double* decrypt16(
 	zeno_cipher* data,
 	float* key,
 	float* salt,
