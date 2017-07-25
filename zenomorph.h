@@ -33,7 +33,7 @@ double* decrypt16(
 zeno_cipher* add16(
 	zeno_cipher* data,
 	size_t position,
-	int16_t value,
+	double value,
 	float* key,
 	float* salt,
 	size_t key_sz

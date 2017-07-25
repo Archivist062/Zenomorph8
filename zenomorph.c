@@ -59,6 +59,16 @@ void printAsJSONarray(double* data,size_t sz)
 	}
 }
 
+void blur(double* data,size_t sz)
+{
+	
+	for(size_t idx=0;idx<sz;idx++)
+	{
+		double b = 0.3-rand()/RAND_MAX*0.6;
+		data[idx]+=b;
+	}
+}
+
 int main(int argc,const char** argv)
 {
 	setlocale(LC_ALL|~LC_NUMERIC, "");
@@ -138,6 +148,7 @@ int main(int argc,const char** argv)
 			data_sz=cur;
 		}
 		if(salt_sz!=key_sz){printf("Salt and key have different sizes\n");exit(6);}
+		blur(data,data_sz);
 		zeno_cipher* cipher=crypt16(data,data_sz,key,salt,key_sz);
 		printAsJSONarray(cipher->content,cipher->size);
 	}else if(strcmp("decrypt",argv[1])==0||strcmp("decrypt_s",argv[1])==0)
@@ -264,8 +275,7 @@ decrypt16(
 
 	for(size_t i=0;i<data->size;i++)
 	{
-		data->content[i]=//(vec[i]/10000.0*(1+key[i%nb_d]))+salt[i%nb_d];
-		round((data->content[i]-salt[i%nb_d])/(1+key[i%nb_d])*10000);
+		data->content[i]=round((data->content[i]-salt[i%nb_d])/(1+key[i%nb_d])*10000);
 	}
 	return data->content;
 }
@@ -277,13 +287,15 @@ archivist::
 add16(
 	zeno_cipher* data,
 	size_t position,
-	int16_t value,
+	double value,
 	float* key,
 	float* salt,
 	size_t key_sz
 )
 {
-
+	size_t nb_d=key_sz;
+	data->content[position]+=(value/10000.0*(1+key[position%nb_d]))+salt[position%nb_d];
+	return data;
 }
 
 zeno_cipher* 
